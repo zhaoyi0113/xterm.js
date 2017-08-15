@@ -16,7 +16,7 @@ normalStateHandler[C0.BS] = (parser, handler) => handler.backspace();
 normalStateHandler[C0.HT] = (parser, handler) => handler.tab();
 normalStateHandler[C0.SO] = (parser, handler) => handler.shiftOut();
 normalStateHandler[C0.SI] = (parser, handler) => handler.shiftIn();
-normalStateHandler[C0.ESC] = (parser, handler) => parser.setState(ParserState.ESCAPED);
+normalStateHandler[C0.ESC] = (parser, handler) => {parser.setState(ParserState.ESCAPED); console.log('set escaped')};
 
 // TODO: Remove terminal when parser owns params and currentParam
 const escapedStateHandler: {[key: string]: (parser: Parser, terminal: any) => void} = {};
@@ -216,7 +216,7 @@ export class Parser {
       // surrogate low - already handled above
       if (0xDC00 <= code && code <= 0xDFFF)
         continue;
-
+      console.log('get ch ', ch, code, this._state);
       switch (this._state) {
         case ParserState.NORMAL:
           if (ch in normalStateHandler) {
@@ -463,7 +463,7 @@ export class Parser {
         case ParserState.CSI:
           if (ch in csiStateHandler) {
             if (this._terminal.debug) {
-              this._terminal.log(`CSI ${this._terminal.prefix ? this._terminal.prefix : ''} ${this._terminal.params ? this._terminal.params.join(';') : ''} ${this._terminal.postfix ? this._terminal.postfix : ''} ${ch}`);
+              this._terminal.log(`CSI ${this._terminal.prefix ? this._terminal.prefix : 'no-prefix'} ${this._terminal.params ? this._terminal.params.join(';') : 'no-params'} ${this._terminal.postfix ? this._terminal.postfix : 'no-post'} ${ch}`);
             }
             csiStateHandler[ch](this._inputHandler, this._terminal.params, this._terminal.prefix, this._terminal.postfix, this);
           } else {
@@ -473,6 +473,7 @@ export class Parser {
           this._state = ParserState.NORMAL;
           this._terminal.prefix = '';
           this._terminal.postfix = '';
+          console.log('terms params:', this._terminal.params);
           break;
 
         case ParserState.DCS:

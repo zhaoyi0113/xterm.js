@@ -222,8 +222,8 @@ function Terminal(options) {
 
   // Create the terminal's buffers and set the current buffer
   this.buffers = new BufferSet(this);
-  this.buffer = this.buffers.active;  // Convenience shortcut;
-  this.buffers.on('activate', function (buffer) {
+  this.buffer = this.buffers.active; // Convenience shortcut;
+  this.buffers.on('activate', function(buffer) {
     this._terminal.buffer = buffer;
   });
 
@@ -277,9 +277,9 @@ Terminal.tangoColors = [
 // Colors 0-15 + 16-255
 // Much thanks to TooTallNate for writing this.
 Terminal.colors = (function() {
-  var colors = Terminal.tangoColors.slice()
-  , r = [0x00, 0x5f, 0x87, 0xaf, 0xd7, 0xff]
-  , i;
+  var colors = Terminal.tangoColors.slice(),
+    r = [0x00, 0x5f, 0x87, 0xaf, 0xd7, 0xff],
+    i;
 
   // 16-231
   i = 0;
@@ -309,10 +309,10 @@ Terminal.colors = (function() {
 Terminal._colors = Terminal.colors.slice();
 
 Terminal.vcolors = (function() {
-  var out = []
-  , colors = Terminal.colors
-  , i = 0
-  , color;
+  var out = [],
+    colors = Terminal.colors,
+    i = 0,
+    color;
 
   for (; i < 256; i++) {
     color = parseInt(colors[i].substring(1), 16);
@@ -347,8 +347,8 @@ Terminal.defaults = {
   disableStdin: false,
   useFlowControl: false,
   tabStopWidth: 8
-  // programFeatures: false,
-  // focusKeys: false,
+    // programFeatures: false,
+    // focusKeys: false,
 };
 
 Terminal.options = {};
@@ -422,32 +422,36 @@ Terminal.prototype.setOption = function(key, value) {
   this[key] = value;
   this.options[key] = value;
   switch (key) {
-    case 'cursorBlink': this.setCursorBlinking(value); break;
+    case 'cursorBlink':
+      this.setCursorBlinking(value);
+      break;
     case 'cursorStyle':
       this.element.classList.toggle(`xterm-cursor-style-block`, value === 'block');
       this.element.classList.toggle(`xterm-cursor-style-underline`, value === 'underline');
       this.element.classList.toggle(`xterm-cursor-style-bar`, value === 'bar');
       break;
-    case 'tabStopWidth': this.setupStops(); break;
+    case 'tabStopWidth':
+      this.setupStops();
+      break;
   }
 };
 
-Terminal.prototype.restartCursorBlinking = function () {
+Terminal.prototype.restartCursorBlinking = function() {
   this.setCursorBlinking(this.options.cursorBlink);
 };
 
-Terminal.prototype.setCursorBlinking = function (enabled) {
+Terminal.prototype.setCursorBlinking = function(enabled) {
   this.element.classList.toggle('xterm-cursor-blink', enabled);
   this.clearCursorBlinkingInterval();
   if (enabled) {
     var self = this;
-    this.cursorBlinkInterval = setInterval(function () {
+    this.cursorBlinkInterval = setInterval(function() {
       self.element.classList.toggle('xterm-cursor-blink-on');
     }, CURSOR_BLINK_INTERVAL);
   }
 };
 
-Terminal.prototype.clearCursorBlinkingInterval = function () {
+Terminal.prototype.clearCursorBlinkingInterval = function() {
   this.element.classList.remove('xterm-cursor-blink-on');
   if (this.cursorBlinkInterval) {
     clearInterval(this.cursorBlinkInterval);
@@ -460,8 +464,8 @@ Terminal.prototype.clearCursorBlinkingInterval = function () {
  *
  * @static
  */
-Terminal.bindFocus = function (term) {
-  on(term.textarea, 'focus', function (ev) {
+Terminal.bindFocus = function(term) {
+  on(term.textarea, 'focus', function(ev) {
     if (term.sendFocus) {
       term.send(C0.ESC + '[I');
     }
@@ -469,7 +473,7 @@ Terminal.bindFocus = function (term) {
     term.showCursor();
     term.restartCursorBlinking.apply(term);
     Terminal.focus = term;
-    term.emit('focus', {terminal: term});
+    term.emit('focus', { terminal: term });
   });
 };
 
@@ -485,8 +489,8 @@ Terminal.prototype.blur = function() {
  *
  * @static
  */
-Terminal.bindBlur = function (term) {
-  on(term.textarea, 'blur', function (ev) {
+Terminal.bindBlur = function(term) {
+  on(term.textarea, 'blur', function(ev) {
     term.refresh(term.buffer.y, term.buffer.y);
     if (term.sendFocus) {
       term.send(C0.ESC + '[O');
@@ -494,7 +498,7 @@ Terminal.bindBlur = function (term) {
     term.element.classList.remove('focus');
     term.clearCursorBlinkingInterval.apply(term);
     Terminal.focus = null;
-    term.emit('blur', {terminal: term});
+    term.emit('blur', { terminal: term });
   });
 };
 
@@ -587,7 +591,7 @@ Terminal.bindKeys = function(term) {
   on(term.textarea, 'compositionupdate', term.compositionHelper.compositionupdate.bind(term.compositionHelper));
   on(term.textarea, 'compositionend', term.compositionHelper.compositionend.bind(term.compositionHelper));
   term.on('refresh', term.compositionHelper.updateCompositionElements.bind(term.compositionHelper));
-  term.on('refresh', function (data) {
+  term.on('refresh', function(data) {
     term.queueLinkification(data.start, data.end)
   });
 };
@@ -598,7 +602,7 @@ Terminal.bindKeys = function(term) {
  * if no row argument is passed. Return the inserted row.
  * @param {HTMLElement} row (optional) The row to append to the terminal.
  */
-Terminal.prototype.insertRow = function (row) {
+Terminal.prototype.insertRow = function(row) {
   if (typeof row != 'object') {
     row = document.createElement('div');
   }
@@ -616,7 +620,9 @@ Terminal.prototype.insertRow = function (row) {
  * @param {boolean} focus Focus the terminal, after it gets instantiated in the DOM
  */
 Terminal.prototype.open = function(parent, focus) {
-  var self=this, i=0, div;
+  var self = this,
+    i = 0,
+    div;
 
   this.parent = parent || this.parent;
 
@@ -672,10 +678,10 @@ Terminal.prototype.open = function(parent, focus) {
   this.textarea.setAttribute('spellcheck', 'false');
   this.textarea.tabIndex = 0;
   this.textarea.addEventListener('focus', function() {
-    self.emit('focus', {terminal: self});
+    self.emit('focus', { terminal: self });
   });
   this.textarea.addEventListener('blur', function() {
-    self.emit('blur', {terminal: self});
+    self.emit('blur', { terminal: self });
   });
   this.helperContainer.appendChild(this.textarea);
 
@@ -693,7 +699,7 @@ Terminal.prototype.open = function(parent, focus) {
   this.parent.appendChild(this.element);
 
   this.charMeasure = new CharMeasure(document, this.helperContainer);
-  this.charMeasure.on('charsizechanged', function () {
+  this.charMeasure.on('charsizechanged', function() {
     self.updateCharSizeStyles();
   });
   this.charMeasure.measure();
@@ -779,9 +785,9 @@ Terminal.loadAddon = function(addon, callback) {
  */
 Terminal.prototype.updateCharSizeStyles = function() {
   this.charSizeStyleElement.textContent =
-      `.xterm-wide-char{width:${this.charMeasure.width * 2}px;}` +
-      `.xterm-normal-char{width:${this.charMeasure.width}px;}` +
-      `.xterm-rows > div{height:${this.charMeasure.height}px;}`;
+    `.xterm-wide-char{width:${this.charMeasure.width * 2}px;}` +
+    `.xterm-normal-char{width:${this.charMeasure.width}px;}` +
+    `.xterm-rows > div{height:${this.charMeasure.height}px;}`;
 }
 
 /**
@@ -795,14 +801,15 @@ Terminal.prototype.updateCharSizeStyles = function() {
  *   BtnCode, EmitButtonCode, EditorButton, SendMousePosition
  */
 Terminal.prototype.bindMouse = function() {
-  var el = this.element, self = this, pressed = 32;
+  var el = this.element,
+    self = this,
+    pressed = 32;
 
   // mouseup, mousedown, wheel
   // left click: ^[[M 3<^[[M#3<
   // wheel up: ^[[M`3>
   function sendButton(ev) {
-    var button
-    , pos;
+    var button, pos;
 
     // get the xterm-style button
     button = getButton(ev);
@@ -833,8 +840,8 @@ Terminal.prototype.bindMouse = function() {
   // motion example of a left click:
   // ^[[M 3<^[[M@4<^[[M@5<^[[M@6<^[[M@7<^[[M#7<
   function sendMove(ev) {
-    var button = pressed
-    , pos;
+    var button = pressed,
+      pos;
 
     pos = getRawByteCoords(ev, self.rowContainer, self.charMeasure, self.cols, self.rows);
     if (!pos) return;
@@ -904,17 +911,17 @@ Terminal.prototype.bindMouse = function() {
       else if (button === 1) button = 4;
       else if (button === 2) button = 6;
       else if (button === 3) button = 3;
-      self.send(C0.ESC + '['
-                + button
-                + ';'
-                + (button === 3 ? 4 : 0)
-                + ';'
-                + pos.y
-                + ';'
-                + pos.x
-                + ';'
-                + (pos.page || 0)
-                + '&w');
+      self.send(C0.ESC + '[' +
+        button +
+        ';' +
+        (button === 3 ? 4 : 0) +
+        ';' +
+        pos.y +
+        ';' +
+        pos.x +
+        ';' +
+        (pos.page || 0) +
+        '&w');
       return;
     }
 
@@ -930,13 +937,13 @@ Terminal.prototype.bindMouse = function() {
     if (self.sgrMouse) {
       pos.x -= 32;
       pos.y -= 32;
-      self.send(C0.ESC + '[<'
-                + (((button & 3) === 3 ? button & ~3 : button) - 32)
-                + ';'
-                + pos.x
-                + ';'
-                + pos.y
-                + ((button & 3) === 3 ? 'm' : 'M'));
+      self.send(C0.ESC + '[<' +
+        (((button & 3) === 3 ? button & ~3 : button) - 32) +
+        ';' +
+        pos.x +
+        ';' +
+        pos.y +
+        ((button & 3) === 3 ? 'm' : 'M'));
       return;
     }
 
@@ -950,11 +957,7 @@ Terminal.prototype.bindMouse = function() {
   }
 
   function getButton(ev) {
-    var button
-    , shift
-    , meta
-    , ctrl
-    , mod;
+    var button, shift, meta, ctrl, mod;
 
     // two low bits:
     // 0 = left
@@ -965,11 +968,11 @@ Terminal.prototype.bindMouse = function() {
     // 1, and 2 - with 64 added
     switch (ev.overrideType || ev.type) {
       case 'mousedown':
-        button = ev.button != null
-          ? +ev.button
-        : ev.which != null
-          ? ev.which - 1
-        : null;
+        button = ev.button != null ?
+          +ev.button :
+          ev.which != null ?
+          ev.which - 1 :
+          null;
 
         if (self.browser.isMSIE) {
           button = button === 1 ? 0 : button === 4 ? 1 : button;
@@ -979,14 +982,14 @@ Terminal.prototype.bindMouse = function() {
         button = 3;
         break;
       case 'DOMMouseScroll':
-        button = ev.detail < 0
-          ? 64
-        : 65;
+        button = ev.detail < 0 ?
+          64 :
+          65;
         break;
       case 'wheel':
-        button = ev.wheelDeltaY > 0
-          ? 64
-        : 65;
+        button = ev.wheelDeltaY > 0 ?
+          64 :
+          65;
         break;
     }
 
@@ -1053,9 +1056,9 @@ Terminal.prototype.bindMouse = function() {
 
   on(el, 'wheel', function(ev) {
     if (!self.mouseEvents) return;
-    if (self.x10Mouse
-        || self.vt300Mouse
-        || self.decLocator) return;
+    if (self.x10Mouse ||
+      self.vt300Mouse ||
+      self.decLocator) return;
     sendButton(ev);
     return self.cancel(ev);
   });
@@ -1268,7 +1271,7 @@ Terminal.prototype.write = function(data) {
     this.writeInProgress = true;
     // Kick off an async innerWrite so more writes can come in while processing data
     var self = this;
-    setTimeout(function () {
+    setTimeout(function() {
       self.innerWrite();
     });
   }
@@ -1278,7 +1281,9 @@ Terminal.prototype.innerWrite = function() {
   var writeBatch = this.writeBuffer.splice(0, WRITE_BATCH_SIZE);
   while (writeBatch.length > 0) {
     var data = writeBatch.shift();
-    var l = data.length, i = 0, j, cs, ch, code, low, ch_width, row;
+    var l = data.length,
+      i = 0,
+      j, cs, ch, code, low, ch_width, row;
 
     // If XOFF was sent in order to catch up with the pty process, resume it if
     // the writeBuffer is empty to allow more data to come in.
@@ -1296,15 +1301,15 @@ Terminal.prototype.innerWrite = function() {
     // state of the parser resets to 0 after exiting parser.parse. This change
     // just sets the state back based on the correct return statement.
     var state = this.parser.parse(data);
+    // console.log('data=', data, 'state=', state, 'buffer=', this.buffer.toString());
     this.parser.setState(state);
-
     this.updateRange(this.buffer.y);
     this.refresh(this.refreshStart, this.refreshEnd);
   }
   if (this.writeBuffer.length > 0) {
     // Allow renderer to catch up before processing the next batch
     var self = this;
-    setTimeout(function () {
+    setTimeout(function() {
       self.innerWrite();
     }, 0);
   } else {
@@ -1375,14 +1380,14 @@ Terminal.prototype.setHypertextValidationCallback = function(callback) {
 };
 
 /**
-   * Registers a link matcher, allowing custom link patterns to be matched and
-   * handled.
-   * @param {RegExp} regex The regular expression to search for, specifically
-   * this searches the textContent of the rows. You will want to use \s to match
-   * a space ' ' character for example.
-   * @param {LinkMatcherHandler} handler The callback when the link is called.
-   * @param {LinkMatcherOptions} [options] Options for the link matcher.
-   * @return {number} The ID of the new matcher, this can be used to deregister.
+ * Registers a link matcher, allowing custom link patterns to be matched and
+ * handled.
+ * @param {RegExp} regex The regular expression to search for, specifically
+ * this searches the textContent of the rows. You will want to use \s to match
+ * a space ' ' character for example.
+ * @param {LinkMatcherHandler} handler The callback when the link is called.
+ * @param {LinkMatcherOptions} [options] Options for the link matcher.
+ * @return {number} The ID of the new matcher, this can be used to deregister.
  */
 Terminal.prototype.registerLinkMatcher = function(regex, handler, options) {
   if (this.linkifier) {
@@ -1826,8 +1831,8 @@ Terminal.prototype.keyPress = function(ev) {
   }
 
   if (!key || (
-    (ev.altKey || ev.ctrlKey || ev.metaKey) && !isThirdLevelShift(this, ev)
-  )) {
+      (ev.altKey || ev.ctrlKey || ev.metaKey) && !isThirdLevelShift(this, ev)
+    )) {
     return false;
   }
 
@@ -1907,12 +1912,7 @@ Terminal.prototype.resize = function(x, y) {
     this.setOption('scrollback', y)
   }
 
-  var line
-  , el
-  , i
-  , j
-  , ch
-  , addToY;
+  var line, el, i, j, ch, addToY;
 
   if (x === this.cols && y === this.rows) {
     // Check if we still need to measure the char size (fixes #785).
@@ -1946,7 +1946,7 @@ Terminal.prototype.resize = function(x, y) {
   this.refresh(0, this.rows - 1);
 
   this.geometry = [this.cols, this.rows];
-  this.emit('resize', {terminal: this, cols: x, rows: y});
+  this.emit('resize', { terminal: this, cols: x, rows: y });
 };
 
 /**
@@ -2001,9 +2001,9 @@ Terminal.prototype.setupStops = function(i) {
 Terminal.prototype.prevStop = function(x) {
   if (x == null) x = this.buffer.x;
   while (!this.buffer.tabs[--x] && x > 0);
-  return x >= this.cols
-    ? this.cols - 1
-  : x < 0 ? 0 : x;
+  return x >= this.cols ?
+    this.cols - 1 :
+    x < 0 ? 0 : x;
 };
 
 
@@ -2014,9 +2014,9 @@ Terminal.prototype.prevStop = function(x) {
 Terminal.prototype.nextStop = function(x) {
   if (x == null) x = this.buffer.x;
   while (!this.buffer.tabs[++x] && x < this.cols);
-  return x >= this.cols
-    ? this.cols - 1
-  : x < 0 ? 0 : x;
+  return x >= this.cols ?
+    this.cols - 1 :
+    x < 0 ? 0 : x;
 };
 
 
@@ -2092,13 +2092,14 @@ Terminal.prototype.eraseLine = function(y) {
  * @param {boolean} isWrapped Whether the new line is wrapped from the previous line.
  */
 Terminal.prototype.blankLine = function(cur, isWrapped) {
-  var attr = cur
-  ? this.eraseAttr()
-  : this.defAttr;
+  var attr = cur ?
+    this.eraseAttr() :
+    this.defAttr;
 
-  var ch = [attr, ' ', 1]  // width defaults to 1 halfwidth character
-  , line = []
-  , i = 0;
+  var ch = [attr, ' ', 1] // width defaults to 1 halfwidth character
+    ,
+    line = [],
+    i = 0;
 
   // TODO: It is not ideal that this is a property on an array, a buffer line
   // class should be added that will hold this data and other useful functions.
@@ -2119,9 +2120,7 @@ Terminal.prototype.blankLine = function(cur, isWrapped) {
  * @param {object} cur
  */
 Terminal.prototype.ch = function(cur) {
-  return cur
-    ? [this.eraseAttr(), ' ', 1]
-  : [this.defAttr, ' ', 1];
+  return cur ? [this.eraseAttr(), ' ', 1] : [this.defAttr, ' ', 1];
 };
 
 
@@ -2247,7 +2246,7 @@ function on(el, type, handler, capture) {
   if (!Array.isArray(el)) {
     el = [el];
   }
-  el.forEach(function (element) {
+  el.forEach(function(element) {
     element.addEventListener(type, handler, capture || false);
   });
 }
@@ -2283,8 +2282,8 @@ function indexOf(obj, el) {
 
 function isThirdLevelShift(term, ev) {
   var thirdLevelKey =
-      (term.browser.isMac && ev.altKey && !ev.ctrlKey && !ev.metaKey) ||
-      (term.browser.isMSWindows && ev.altKey && ev.ctrlKey && !ev.metaKey);
+    (term.browser.isMac && ev.altKey && !ev.ctrlKey && !ev.metaKey) ||
+    (term.browser.isMSWindows && ev.altKey && ev.ctrlKey && !ev.metaKey);
 
   if (ev.type == 'keypress') {
     return thirdLevelKey;
@@ -2304,14 +2303,10 @@ function matchColor(r1, g1, b1) {
     return matchColor._cache[hash];
   }
 
-  var ldiff = Infinity
-  , li = -1
-  , i = 0
-  , c
-  , r2
-  , g2
-  , b2
-  , diff;
+  var ldiff = Infinity,
+    li = -1,
+    i = 0,
+    c, r2, g2, b2, diff;
 
   for (; i < Terminal.vcolors.length; i++) {
     c = Terminal.vcolors[i];
@@ -2339,9 +2334,9 @@ matchColor._cache = {};
 
 // http://stackoverflow.com/questions/1633828
 matchColor.distance = function(r1, g1, b1, r2, g2, b2) {
-  return Math.pow(30 * (r1 - r2), 2)
-    + Math.pow(59 * (g1 - g2), 2)
-    + Math.pow(11 * (b1 - b2), 2);
+  return Math.pow(30 * (r1 - r2), 2) +
+    Math.pow(59 * (g1 - g2), 2) +
+    Math.pow(11 * (b1 - b2), 2);
 };
 
 function each(obj, iter, con) {

@@ -75,5 +75,8 @@
     "build": "gulp build",
     "prepublish": "npm run build",
     "coveralls": "gulp coveralls"
+  },
+  "dependencies": {
+    "xterm2": "^1.2.0"
   }
 }
